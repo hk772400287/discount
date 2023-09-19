@@ -1,6 +1,7 @@
 package com.ggw.discount.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ggw.discount.common.R;
 import com.ggw.discount.dto.DiscountDto;
@@ -27,32 +28,16 @@ public class DiscountController {
     @Autowired
     private DiscountStoreService discountStoreService;
 
-    @GetMapping("/page")
-    public R<Page> getAllForAdmin(int page, int pageSize, Store store) {
-//        Page<Discount> pageInfo = new Page<>(page, pageSize);
-//        LambdaQueryWrapper<Discount> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrappe
-//        discountService.page(pageInfo);
-//
-//        return R.success(pageInfo);
-        return null;
+    @GetMapping("/forAdminByPage/{page}/{pageSize}")
+    public R<Page> getAllForAdmin(@PathVariable int page, @PathVariable int pageSize, Store store) {
+        Page<Discount> discountPage = new Page<>(page, pageSize);
+        Page<DiscountDto> discountDtoPage = discountService.getAllWithStoresBySpecifyStoreNameByPage(store, discountPage);
+        return R.success(discountDtoPage);
     }
 
     @PostMapping
     public R<String> add(@RequestBody DiscountDto discountDto) {
-        //Save to Discount table.
-        discountService.save(discountDto);
-        //Save to Discount_Store table.
-        List<Store> storeList = discountDto.getStoreList();
-        Long discountId = discountDto.getId();
-        List<DiscountStore> discountStoreList = storeList.stream().map((store -> {
-            Long storeId = store.getId();
-            DiscountStore discountStore = new DiscountStore();
-            discountStore.setDiscountId(discountId);
-            discountStore.setStoreId(storeId);
-            return discountStore;
-        })).collect(Collectors.toList());
-        discountStoreService.saveBatch(discountStoreList);
+        discountService.saveWithStores(discountDto);
         return R.success("Saved successfully");
     }
 }

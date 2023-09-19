@@ -14,4 +14,10 @@ public class DiscountDto extends Discount {
 
     private BigDecimal balanceAmount;
 
+    private Long storeId;
+
+    private String name;
+
+    private String icon;
+
 }
