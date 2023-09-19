@@ -29,9 +29,10 @@ public class DiscountController {
     private DiscountStoreService discountStoreService;
 
     @GetMapping("/forAdminByPage/{page}/{pageSize}")
-    public R<Page> getAllForAdmin(@PathVariable int page, @PathVariable int pageSize, Store store) {
+    public R<Page> getAllForAdmin(@PathVariable int page, @PathVariable int pageSize, DiscountDto discountDto) {
+        //discountDto: store name, discount description.
         Page<Discount> discountPage = new Page<>(page, pageSize);
-        Page<DiscountDto> discountDtoPage = discountService.getAllWithStoresBySpecifyStoreNameByPage(store, discountPage);
+        Page<DiscountDto> discountDtoPage = discountService.getAllWithStoresBySpecifyStoreNameOrDescriptionByPage(discountDto, discountPage);
         return R.success(discountDtoPage);
     }
 
@@ -39,5 +40,17 @@ public class DiscountController {
     public R<String> add(@RequestBody DiscountDto discountDto) {
         discountService.saveWithStores(discountDto);
         return R.success("Saved successfully");
+    }
+
+    @PutMapping
+    public R<String> update(@RequestBody DiscountDto discountDto) {
+        discountService.updateWithStores(discountDto);
+        return R.success("Updated successfully");
+    }
+
+    @DeleteMapping("/{id}")
+    public R<String> delete(@PathVariable Long id) {
+        discountService.deleteWithStores(id);
+        return R.success("Deleted successfully");
     }
 }

@@ -23,4 +23,6 @@ public class DiscountStore implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+
+    private Integer isDeleted;
 }

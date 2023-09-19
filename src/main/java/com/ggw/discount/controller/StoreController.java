@@ -1,6 +1,7 @@
 package com.ggw.discount.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ggw.discount.common.R;
 import com.ggw.discount.entity.Store;
@@ -29,17 +30,19 @@ public class StoreController {
         return R.success("Updated successfully");
     }
 
-    @DeleteMapping
-    public R<String> delete(Long id) {
-        storeService.removeById(id);
+    @DeleteMapping("/{id}")
+    public R<String> delete(@PathVariable Long id) {
+        LambdaUpdateWrapper<Store> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.set(Store::getIsDeleted, 1).eq(Store::getId, id);
+        storeService.update(wrapper);
         return R.success("Deleted successfully");
     }
 
-    @GetMapping("/page")
-    public R<Page> getAll(int page, int pageSize, Store store) {
+    @GetMapping("/all/{page}/{pageSize}")
+    public R<Page> getAll(@PathVariable int page, @PathVariable int pageSize, Store store) {
         Page<Store> pageInfo = new Page<>(page, pageSize);
         LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.orderByAsc(Store::getName);
+        lambdaQueryWrapper.orderByAsc(Store::getName).eq(Store::getIsDeleted, 0);
         lambdaQueryWrapper.like(store.getName() != null, Store::getName, store.getName());
         storeService.page(pageInfo, lambdaQueryWrapper);
         return R.success(pageInfo);

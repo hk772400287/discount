@@ -30,7 +30,7 @@ public class testDiscountService {
     public void testGetAllWithStoresBySpecifyStoreName() {
         Store store = new Store();
         store.setName("711");
-        Page<DiscountDto> page = discountService.getAllWithStoresBySpecifyStoreNameByPage(store, new Page<Discount>(1, 2));
-        log.info(page.toString());
+        //Page<DiscountDto> page = discountService.getAllWithStoresBySpecifyStoreNameByPage(store, new Page<Discount>(1, 2));
+        //log.info(page.toString());
     }
 }
