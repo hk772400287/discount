@@ -14,9 +14,11 @@ public interface DiscountService extends IService<Discount> {
 
     void updateWithStores(DiscountDto discountDto);
 
-    Page<DiscountDto> getAllWithStoresBySpecifyStoreNameOrDescriptionByPage(DiscountDto discountDto, Page<Discount> page);
+    Page<DiscountDto> getAllWithStoresForAdmin(DiscountDto discountDto, Page<Discount> page);
 
     DiscountDto getWithStoresById(Long id);
 
     void deleteWithStores(Long id);
+
+    Page<DiscountDto> getAllWithStoresForUser(DiscountDto discountDto, Page<Discount> discountPage, Long userId);
 }

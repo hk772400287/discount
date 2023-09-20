@@ -22,6 +22,8 @@ public class UserDiscountSpending implements Serializable {
 
     private Long storeId;
 
+    private String storeName;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

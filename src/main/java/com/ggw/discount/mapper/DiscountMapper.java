@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Mapper
@@ -22,7 +23,7 @@ public interface DiscountMapper extends BaseMapper<Discount> {
      */
     @Select("""
                <script>
-                    SELECT d.id, d.description, d.start, d.end, d.max_amount, s.name, s.icon
+                    SELECT d.id
                     FROM discount d INNER JOIN discount_store ds ON d.id = ds.discount_id
                     INNER JOIN store s ON ds.store_id = s.id
                     <where>
@@ -34,10 +35,10 @@ public interface DiscountMapper extends BaseMapper<Discount> {
                             and description like CONCAT(CONCAT('%', #{description}), '%')
                         </if>
                     </where>
-                    ORDER BY d.start DESC
+                    GROUP BY d.id
                 </script>
             """)
-    List<DiscountDto> getAllWithStoresBySpecifyStoreNameOrDescription(DiscountDto discountDto);
+    List<Long> getDiscountIdsWithStoresByStoreNameOrDesc(DiscountDto discountDto);
 
 
     /**
@@ -51,4 +52,25 @@ public interface DiscountMapper extends BaseMapper<Discount> {
         "INNER JOIN store s ON ds.store_id = s.id " +
         "WHERE d.id = #{id}")
     List<DiscountDto> getWithStoresById(Long id);
+
+
+
+    @Select("""
+               <script>
+                    SELECT d.id
+                    FROM discount d INNER JOIN discount_store ds ON d.id = ds.discount_id
+                    INNER JOIN store s ON ds.store_id = s.id
+                    <where>
+                        d.end >= CURDATE() AND d.is_deleted = 0
+                        <if test="name != null">
+                            and name like CONCAT(CONCAT('%', #{name}), '%')
+                        </if>
+                        <if test="description != null">
+                            and description like CONCAT(CONCAT('%', #{description}), '%')
+                        </if>
+                    </where>
+                    GROUP BY d.id
+                </script>
+            """)
+    List<Long> getUnexpiredDiscountIdsWithStoresByStoreNameOrDesc(DiscountDto discountDto);
 }
