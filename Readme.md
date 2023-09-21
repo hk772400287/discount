@@ -36,6 +36,7 @@ SpringBoot、MySql、MyBatis Plusでポイント活動を便利にするアプ�
 - **お気に入りのお店またはキャンペンーンの登録・削除**
 
 ## DB設計
+![DB](https://github.com/hk772400287/discount/assets/105110420/ab862bf5-d074-41f6-8dbb-6a7a4d7b8c01)
 
 
 ## 各テーブル
