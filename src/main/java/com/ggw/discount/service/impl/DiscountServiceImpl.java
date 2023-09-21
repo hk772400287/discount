@@ -5,19 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ggw.discount.dto.DiscountDto;
-import com.ggw.discount.entity.Discount;
-import com.ggw.discount.entity.DiscountStore;
-import com.ggw.discount.entity.Store;
-import com.ggw.discount.entity.UserDiscountBalance;
+import com.ggw.discount.entity.*;
 import com.ggw.discount.mapper.DiscountMapper;
 import com.ggw.discount.service.DiscountService;
 import com.ggw.discount.service.DiscountStoreService;
 import com.ggw.discount.service.UserDiscountBalanceService;
+import com.ggw.discount.service.UserDiscountSpendingService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +30,9 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
 
     @Autowired
     private UserDiscountBalanceService userDiscountBalanceService;
+
+    @Autowired
+    private UserDiscountSpendingService userDiscountSpendingService;
 
     /**
      * Save the discount info to discount table and discount_store table.
@@ -72,7 +74,7 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
 
 
     /**
-     * Get the discount info with store lists by specifying an discount id.
+     * Get the discount info with store lists by specifying a discount id.
      * @param id: discountId
      * @return
      */
@@ -116,9 +118,7 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
         //Get all the related discount ids.
         List<Long> discountIdList = this.baseMapper.getDiscountIdsWithStoresByStoreNameOrDesc(discountDtoQuery);
         //Get the discount info by ids.
-        LambdaQueryWrapper<Discount> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(Discount::getId, discountIdList).orderByDesc(Discount::getStart);
-        Page<Discount> discountPage = this.page(page, wrapper);
+        Page<Discount> discountPage = this.getByIdsByPage(page, discountIdList);
         //Get store lists and set to the return Dto page info.
         Page<DiscountDto> discountDtoPage = new Page<>();
         BeanUtils.copyProperties(discountPage, discountDtoPage, "records");
@@ -132,23 +132,54 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
     @Override
     public Page<DiscountDto> getAllWithStoresForUser(DiscountDto discountDtoQuery, Page<Discount> page, Long userId) {
         List<Long> discountIdList = this.baseMapper.getUnexpiredDiscountIdsWithStoresByStoreNameOrDesc(discountDtoQuery);
-        LambdaQueryWrapper<Discount> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(Discount::getId, discountIdList).orderByDesc(Discount::getStart);
-        Page<Discount> discountPage = this.page(page, wrapper);
-        //Get store lists and set to the return Dto page info.
+        Page<Discount> discountPage = this.getByIdsByPage(page, discountIdList);
+        //Get store lists & user balance and set to the return Dto page info.
+        return this.convertDiscountPageToDiscountDtoPage(discountPage, userId);
+    }
+
+
+    /**
+     * Set store lists and user balance to convert the discountPage to discountDtoPage.
+     * @param discountPage
+     * @param userId
+     * @return
+     */
+    @Override
+    public Page<DiscountDto> convertDiscountPageToDiscountDtoPage(Page<Discount> discountPage, Long userId) {
         Page<DiscountDto> discountDtoPage = new Page<>();
         BeanUtils.copyProperties(discountPage, discountDtoPage, "records");
         List<Discount> discountList = discountPage.getRecords();
         List<DiscountDto> discountDtos = discountList.stream().map(((discount -> {
-            DiscountDto discountDto = this.getWithStoresById(discount.getId());
-            LambdaQueryWrapper<UserDiscountBalance> wrapper1 = new LambdaQueryWrapper<>();
-            wrapper1.eq(UserDiscountBalance::getUserId, userId).eq(UserDiscountBalance::getDiscountId, discountDto.getId());
-            UserDiscountBalance userDiscountBalance = userDiscountBalanceService.getOne(wrapper1);
-            discountDto.setBalanceAmount(userDiscountBalance.getBalanceAmount());
+            //Set store lists.
+            Long discountId = discount.getId();
+            DiscountDto discountDto = this.getWithStoresById(discountId);
+            //Set user balance.
+            BigDecimal balance = userDiscountBalanceService.getBalanceById(discountId, userId);
+            discountDto.setBalanceAmount(balance);
             return discountDto;
         }))).collect(Collectors.toList());
         discountDtoPage.setRecords(discountDtos);
         return discountDtoPage;
+    }
+
+    private Page<Discount> getByIdsByPage(Page<Discount> page, List<Long> discountIdList) {
+        LambdaQueryWrapper<Discount> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Discount::getId, discountIdList).orderByDesc(Discount::getStart);
+        return this.page(page, wrapper);
+    }
+
+    @Override
+    public DiscountDto getDiscountInfoWithSpendingById(Long discountId, Long userId) {
+        //Get discount basic info with stores.
+        DiscountDto discountDto = getWithStoresById(discountId);
+        //Set user balance.
+        BigDecimal balance = userDiscountBalanceService.getBalanceById(discountId, userId);
+        discountDto.setBalanceAmount(balance);
+        //Todo:Set user spending list.
+        List<UserDiscountSpending> userDiscountSpendingList = userDiscountSpendingService.
+                getSpendingListById(discountId, userId);
+        discountDto.setSpendingList(userDiscountSpendingList);
+        return discountDto;
     }
 
 

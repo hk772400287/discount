@@ -21,6 +21,5 @@ public class Favourite implements Serializable {
 
     private Long discountId;
 
-    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }
