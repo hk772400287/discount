@@ -22,7 +22,7 @@
 //        HttpServletRequest request = (HttpServletRequest) servletRequest;
 //        HttpServletResponse response = (HttpServletResponse) servletResponse;
 //        String requestURI = request.getRequestURI();
-//        String[] urlPatterns = {"/user/signup", "/user/login", "/user/logout", "/backend/**", "/frontend/**", "/common/**"};
+//        String[] urlPatterns = {"/user/signup", "/user/login", "/user/logout", "/back/**", "/front/**", "/common/**"};
 //        boolean isAllowPassing = isAllowPassing(requestURI, urlPatterns);
 //        if (isAllowPassing) {
 //            log.info("Allow pass: {}", requestURI);
