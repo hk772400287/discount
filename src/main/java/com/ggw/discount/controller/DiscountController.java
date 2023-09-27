@@ -38,19 +38,19 @@ public class DiscountController {
         return R.success("Deleted successfully");
     }
 
-    @GetMapping("/forAdminByPage/{page}/{pageSize}")
-    public R<Page> getAllForAdmin(@PathVariable int page, @PathVariable int pageSize, DiscountDto discountDto) {
+    @GetMapping("/forAdminByPage")
+    public R<Page> getAllForAdmin(int page, int pageSize, DiscountDto discountDto) {
         //discountDto: Include store name and discount description specified by the admin.
         Page<Discount> discountPage = new Page<>(page, pageSize);
         Page<DiscountDto> discountDtoPage = discountService.getAllWithStoresForAdmin(discountDto, discountPage);
         return R.success(discountDtoPage);
     }
 
-    @GetMapping("/forUserByPage/{page}/{pageSize}")
-    public R<Page> getAllForUser(@PathVariable int page, @PathVariable int pageSize, DiscountDto discountDto) {
+    @GetMapping("/forUserByPage")
+    public R<Page> getAllForUser(int page, int pageSize, DiscountDto discountDto) {
         //discountDto: Include store name and discount description specified by the user.
-        //Todo: Long userId = BaseContext.getCurrentId();
-        Long userId = 1704119254814224412L;
+        Long userId = BaseContext.getCurrentId();
+//        Long userId = 1704119254814224412L;
         Page<Discount> discountPage = new Page<>(page, pageSize);
         Page<DiscountDto> discountDtoPage = discountService.getAllWithStoresForUser(discountDto, discountPage, userId);
         return R.success(discountDtoPage);
@@ -62,10 +62,16 @@ public class DiscountController {
      * @return
      */
     @GetMapping("/forUserDetail")
-    public R<DiscountDto> getDiscountDetailForUser(Long discountId) {
-        //Todo: Long userId = BaseContext.getCurrentId();
-        Long userId = 1704119254814224412L;
-        DiscountDto discountDto = discountService.getDiscountInfoWithSpendingById(discountId, userId);
+    public R<DiscountDto> getDiscountDetailForUser(Long id) {
+        Long userId = BaseContext.getCurrentId();
+//        Long userId = 1704119254814224412L;
+        DiscountDto discountDto = discountService.getDiscountInfoWithSpendingById(id, userId);
+        return R.success(discountDto);
+    }
+
+    @GetMapping("/forAdminDetail")
+    public R<DiscountDto> getDiscountDetailForAdmin(Long id) {
+        DiscountDto discountDto = discountService.getWithStoresById(id);
         return R.success(discountDto);
     }
 

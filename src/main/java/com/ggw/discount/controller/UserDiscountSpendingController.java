@@ -18,9 +18,9 @@ public class UserDiscountSpendingController {
 
     @PostMapping
     public R<String> add(@RequestBody UserDiscountSpending spending) {
-        //Todo: spending.setUserId(BaseContext.getCurrentId());
-        Long userId = 1704119254814224412L;
-        spending.setUserId(userId);
+        spending.setUserId(BaseContext.getCurrentId());
+        //Long userId = 1704119254814224412L;
+        //spending.setUserId(userId);
         userDiscountSpendingService.addWithbalance(spending);
         return R.success("Added successfully");
     }

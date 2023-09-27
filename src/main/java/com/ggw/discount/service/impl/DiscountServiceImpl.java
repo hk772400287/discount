@@ -82,6 +82,8 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
     public DiscountDto getWithStoresById(Long id) {
         List<DiscountDto> discountDtoList = this.baseMapper.getWithStoresById(id);
         DiscountDto discountDto = new DiscountDto();
+        System.out.println("*******discountDtoList:");
+        discountDtoList.forEach(System.out::println);
         BeanUtils.copyProperties(discountDtoList.get(0), discountDto, "storeId", "name", "icon");
         List<Store> storeList = discountDtoList.stream().map((discountDto1 -> {
             Store store = new Store();
@@ -175,7 +177,7 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
         //Set user balance.
         BigDecimal balance = userDiscountBalanceService.getBalanceById(discountId, userId);
         discountDto.setBalanceAmount(balance);
-        //Todo:Set user spending list.
+        //Set user spending list.
         List<UserDiscountSpending> userDiscountSpendingList = userDiscountSpendingService.
                 getSpendingListById(discountId, userId);
         discountDto.setSpendingList(userDiscountSpendingList);

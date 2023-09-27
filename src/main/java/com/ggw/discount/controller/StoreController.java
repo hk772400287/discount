@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/store")
@@ -38,13 +40,18 @@ public class StoreController {
         return R.success("Deleted successfully");
     }
 
-    @GetMapping("/all/{page}/{pageSize}")
-    public R<Page> getAll(@PathVariable int page, @PathVariable int pageSize, Store store) {
+    @GetMapping("/page")
+    public R<Page> getAllByPage(int page, int pageSize, Store store) {
         Page<Store> pageInfo = new Page<>(page, pageSize);
         LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.orderByAsc(Store::getName).eq(Store::getIsDeleted, 0);
         lambdaQueryWrapper.like(store.getName() != null, Store::getName, store.getName());
         storeService.page(pageInfo, lambdaQueryWrapper);
         return R.success(pageInfo);
+    }
+
+    @GetMapping("/list")
+    public R<List<Store>> getAllByList() {
+        return R.success(storeService.list());
     }
 }

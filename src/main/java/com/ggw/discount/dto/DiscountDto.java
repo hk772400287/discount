@@ -17,8 +17,10 @@ public class DiscountDto extends Discount {
 
     private Long storeId;
 
+    //Store name
     private String name;
 
+    //Store icon
     private String icon;
 
     private List<UserDiscountSpending> spendingList;

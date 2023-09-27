@@ -22,7 +22,8 @@
 //        HttpServletRequest request = (HttpServletRequest) servletRequest;
 //        HttpServletResponse response = (HttpServletResponse) servletResponse;
 //        String requestURI = request.getRequestURI();
-//        String[] urlPatterns = {"/user/signup", "/user/login", "/user/logout", "/back/**", "/front/**", "/common/**"};
+//        String[] urlPatterns = {"/user/signup", "/user/login", "/user/logout", "/backend/**", "/front/**", "/common/**",
+//        "/doc.html", "webjars/**", "/swagger-resources", "/v2/api-docs"};
 //        boolean isAllowPassing = isAllowPassing(requestURI, urlPatterns);
 //        if (isAllowPassing) {
 //            log.info("Allow pass: {}", requestURI);
@@ -36,7 +37,7 @@
 //            return;
 //        }
 //        log.info("Haven't logged in: {}", requestURI);
-//        response.getWriter().write(JSON.toJSONString(R.error("Haven't login")));
+//        response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
 //
 //    }
 //

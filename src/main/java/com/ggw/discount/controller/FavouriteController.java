@@ -43,8 +43,8 @@ public class FavouriteController {
      */
     @GetMapping("/{page}/{pageSize}")
     public R<Page> getAllByCategory(@PathVariable int page, @PathVariable int pageSize, int category) {
-        //Todo: Long userId = BaseContext.getCurrentId();
-        Long userId = 1704119254814224412L;
+        Long userId = BaseContext.getCurrentId();
+        //Long userId = 1704119254814224412L;
         Page pageInfo = favouriteService.getAllByCategory(page, pageSize, category, userId);
         return R.success(pageInfo);
     }
