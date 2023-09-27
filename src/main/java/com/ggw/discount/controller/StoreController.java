@@ -54,4 +54,9 @@ public class StoreController {
     public R<List<Store>> getAllByList() {
         return R.success(storeService.list());
     }
+
+    @GetMapping
+    public R<Store> getById(Long id) {
+        return R.success(storeService.getById(id));
+    }
 }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+  <link rel="stylesheet" href="../../styles/common.css" />
+  <link rel="stylesheet" href="../../styles/page.css" />
+  <style>
+    #member-app  .notAdmin::after{
+      border: 0 !important;
+
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container" id="member-app">
+    <div class="container">
+      <div class="tableBar">
+        <el-input v-model="storeName" placeholder="店舗名" style="width: 250px;margin-right: 10px;"></el-input>
+        <el-button @click="handleQuery" class="dalfBut">探す</el-button>
+        <el-button
+          type="primary"
+          @click="addStoreHandle('add')"
+        >
+          + 店舗を追加
+        </el-button>
+      </div>
+      <el-table
+        :data="tableData"
+        stripe
+        class="tableBox"
+      >
+        <el-table-column prop="icon" label="アイコン" align="center">
+          <template slot-scope="{ row }">
+            <el-image style="width: auto; height: 40px; border:none;cursor: pointer;"
+                      :src="getImage(row.icon)"
+                      :preview-src-list="[ `/common/download?name=${row.icon}` ]" >
+              <div slot="error" class="image-slot">
+                <img src="./../../images/noImg.png"  style="width: auto; height: 40px; border:none;" >
+              </div>
+            </el-image>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          prop="name"
+          label="店舗名"
+        ></el-table-column>
+
+        <el-table-column
+          label="操作"
+          width="160"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="small"
+              class="blueBug"
+              @click="addStoreHandle(scope.row.id)"
+            >
+              編集
+            </el-button>
+            <el-button
+              type="text"
+              size="small"
+              class="delBut non"
+              @click="deleteHandle(scope.row.id)"
+            >
+              削除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        class="pageList"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="counts"
+        :current-page.sync="page"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+    </div>
+  </div>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="../../plugins/vue/vue.js"></script>
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入axios -->
+    <script src="../../plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/store.js"></script>
+    <script>
+      new Vue({
+        el: '#member-app',
+        data() {
+          return {
+             storeName: '',
+             counts: 0,
+             page: 1,
+             pageSize: 10,
+             tableData : [],
+             id : '',
+          }
+        },
+        computed: {},
+        created() {
+          this.init()
+          this.user = JSON.parse(localStorage.getItem('userInfo'))
+        },
+        mounted() {
+        },
+        methods: {
+          async init () {
+            const params = {
+              page: this.page,
+              pageSize: this.pageSize,
+              name: this.storeName ? this.storeName : undefined,
+            }
+            await getAllStoresByPage(params).then(res => {
+              if (String(res.code) === '1') {
+                this.tableData = res.data.records || []
+                this.counts = res.data.total
+              }
+            }).catch(err => {
+              this.$message.error('请求出错了：' + err)
+            })
+          },
+          getImage (image) {
+            return `/common/download?name=${image}`
+          },
+          handleQuery() {
+            this.page = 1;
+            this.init();
+          },
+          addStoreHandle (st) {
+            if (st === 'add'){
+              window.parent.menuHandle({
+                id: '3',
+                url: '/backend/page/store/add.html',
+                name: '店舗を追加'
+              },true)
+            } else {
+              window.parent.menuHandle({
+                id: '3',
+                url: '/backend/page/store/add.html?id='+st,
+                name: '店舗を編集'
+              },true)
+            }
+          },
+          deleteHandle(id) {
+            this.$confirm('本当に削除しますか?', '確認', {
+              'confirmButtonText': '削除する',
+              'cancelButtonText': 'キャンセル',
+              'type': 'warning'
+            }).then(() => {
+              deleteStore(id).then(res => {
+                if (res.code === 1) {
+                  this.$message.success('削除しました')
+                  this.handleQuery()
+                } else {
+                  this.$message.error(res.msg || '削除できませんでした')
+                }
+              }).catch(err => {
+                this.$message.error('エラーが発生しました：' + err)
+              })
+            })
+          },
+          handleSizeChange (val) {
+            this.pageSize = val
+            this.init()
+          },
+          handleCurrentChange (val) {
+            this.page = val
+            this.init()
+          }
+        }
+      })
+    </script>
+</body>
+</html>

@@ -13,9 +13,17 @@ function getAllStoresByList () {
     })
 }
 
+function getStoreById (id) {
+    return $axios({
+        url: '/store',
+        method: 'get',
+        params: { id }
+    })
+}
+
 const deleteStore = (id) => {
     return $axios({
-        url: '/store/${id}',
+        url: `/store/${id}`,
         method: 'delete'
     })
 }
@@ -35,5 +43,16 @@ function editStore (params) {
         url: '/store',
         method: 'put',
         data: { ...params }
+    })
+}
+
+const commonDownload = (params) => {
+    return $axios({
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        url: '/common/download',
+        method: 'get',
+        params
     })
 }
