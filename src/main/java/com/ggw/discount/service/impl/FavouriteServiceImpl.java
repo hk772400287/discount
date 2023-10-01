@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FavouriteServiceImpl extends ServiceImpl<FavouriteMapper, Favourite> implements FavouriteService {
@@ -42,5 +44,22 @@ public class FavouriteServiceImpl extends ServiceImpl<FavouriteMapper, Favourite
         List<Discount> discountList = this.baseMapper.getFavouriteDiscounts(userId, discountPage);
         discountPage.setRecords(discountList);
         return discountService.convertDiscountPageToDiscountDtoPage(discountPage, userId);
+    }
+
+    /**
+     *Get favourite discount id list or store id list.
+     * @param category: 0: store, 1: discount.
+     * @param userId
+     * @return
+     */
+    @Override
+    public Set<Long> listByCategory(int category, Long userId) {
+        LambdaQueryWrapper<Favourite> favouriteWrapper = new LambdaQueryWrapper<>();
+        favouriteWrapper.eq(Favourite::getUserId, userId);
+        favouriteWrapper.isNotNull(category == 1 ? Favourite::getDiscountId : Favourite::getStoreId);
+        favouriteWrapper.select(category == 1 ? Favourite::getDiscountId : Favourite::getStoreId);
+        List<Favourite> favouriteList = this.list(favouriteWrapper);
+        return favouriteList.stream().map(favourite -> category == 1 ?
+                favourite.getDiscountId() : favourite.getStoreId()).collect(Collectors.toSet());
     }
 }

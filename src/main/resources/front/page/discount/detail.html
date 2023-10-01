@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポイ活一覧</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../../backend/plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="../../../backend/styles/common.css" />
+    <link rel="stylesheet" href="../../../backend/styles/page.css" />
+    <style>
+        #member-app  .notAdmin::after{
+            border: 0 !important;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+        }
+
+        .head-lable {
+            font-size: 24px;
+        }
+
+        .right-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-wrapper {
+            margin-right: 10px;
+        }
+
+        .outLogin {
+            cursor: pointer;
+            height: 24px;
+            width: 24px;
+        }
+        /* 调整容器布局为水平排列 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        /* 调整第二个表格的间距，使其与第一个表格有一定的距离 */
+        .el-table:nth-child(2) {
+            margin-top: 20px;
+        }
+
+        /* "增加消费记录" 按钮样式 */
+        .add-record-button {
+            align-self: flex-end; /* 右对齐 */
+            margin-top: 20px; /* 距离上方表格的距离 */
+        }
+
+    </style>
+</head>
+<body>
+<div class="dashboard-container" id="member-app">
+
+    <div class="navbar">
+        <div class="head-lable">
+            <span>{{headTitle}}</span>
+        </div>
+        <div class="right-menu">
+            <div class="avatar-wrapper">{{ this.user.name }}</div>
+            <img src="../../../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
+        </div>
+    </div>
+
+    <div class="container">
+        <el-table
+                :data="tableData"
+                stripe
+                class="tableBox"
+        >
+            <el-table-column
+              prop="description"
+              label="キャンペンーン内容"
+            ></el-table-column>
+            <el-table-column
+                    prop="start"
+                    label="開始日"
+            ></el-table-column>
+            <el-table-column
+                    prop="end"
+                    label="終了日"
+            ></el-table-column>
+            <el-table-column
+                    prop="maxAmount"
+                    label="上限額"
+            ></el-table-column>
+            <el-table-column label="対象店舗">
+                <template slot-scope="scope">
+                    <div v-for="store in scope.row.storeList">
+                        {{ store.name }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="balanceAmount"
+                    label="上限額までの金額"
+            ></el-table-column>
+            <el-table-column
+                    label="お気に入り"
+                    width="160"
+                    align="center"
+            >
+                <template slot-scope="scope">
+                    <el-button
+                            type="text"
+                            size="small"
+                            class="delBut non"
+                            @click="isFavouriteHandle(scope.row)"
+                    >
+                        {{ scope.row.isFavourite == '0' ? '入れる' : 'はずす' }}
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <el-table
+                :data="tableData.spendingList"
+                stripe
+                class="tableBox"
+        >
+            <el-table-column
+                    prop="date"
+                    label="日付"
+            ></el-table-column>
+            <el-table-column
+                    prop="storeName"
+                    label="店舗名"
+            ></el-table-column>
+            <el-table-column
+                    prop="amount"
+                    label="消費金額"
+            ></el-table-column>
+        </el-table>
+
+        <div class="add-record-button">
+            <el-button
+                    type="primary"
+                    @click="addSpendingRecord()"
+            >
+                消費記録を追加
+            </el-button>
+        </div>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../../../backend/plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../backend/plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../../backend/plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../../backend/js/index.js"></script>
+<script src="../../../backend/api/discount.js"></script>
+<script src="../../../backend/api/login.js"></script>
+<script src="../../api/favourite.js"></script>
+<script>
+    new Vue({
+        el: '#member-app',
+        data() {
+            return {
+                user: {},
+                tableData : [],
+                id : '',
+                isFavourite : '',
+                headTitle: 'キャンペーン詳細と消費記録',
+            }
+        },
+        computed: {},
+        created() {
+            this.init()
+            this.user = JSON.parse(localStorage.getItem('userInfo'))
+        },
+        mounted() {
+        },
+        methods: {
+            async init () {
+                this.id = requestUrlParam('id')
+                await queryDiscountForUserById(this.id).then(res => {
+                    console.log(res.data)
+                    if (String(res.code) === '1') {
+                        this.tableData = [res.data] || []
+                    }
+                }).catch(err => {
+                    this.$message.error('リクエストエラー：' + err)
+                })
+            },
+            handleQuery() {
+                this.init();
+            },
+            logout() {
+                logoutApi().then((res)=>{
+                    if(res.code === 1){
+                        localStorage.removeItem('userInfo')
+                        window.location.href = '/front/page/login/login.html'
+                    }
+                })
+            },
+            isFavouriteHandle (row) {
+                this.id = row.id
+                if (row.isFavourite === 0) {
+                    addFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
+                        if (String(res.code) === '1') {
+                            this.$message.success('お気に入りに入れました')
+                            this.handleQuery()
+                        }
+                    }).catch(err => {
+                        this.$message.error('リクエストエラー：' + err)
+                    })
+                } else {
+                    deleteFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
+                        if (String(res.code) === '1') {
+                            this.$message.success('お気に入りから外しました')
+                            this.handleQuery()
+                        }
+                    }).catch(err => {
+                        this.$message.error('リクエストエラー：' + err)
+                    })
+                }
+            },
+            addSpendingRecord() {
+
+            }
+        }
+    })
+</script>
+</body>
+</html>

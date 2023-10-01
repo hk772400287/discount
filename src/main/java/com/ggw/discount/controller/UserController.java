@@ -44,7 +44,7 @@ public class UserController {
         if (!foundUser.getPassword().equals(user.getPassword())) {
             return R.error("Password is not correct");
         }
-        session.setAttribute("user", user.getId());
+        session.setAttribute("user", foundUser.getId());
         return R.success(foundUser);
     }
 

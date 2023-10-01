@@ -25,4 +25,7 @@ public class DiscountDto extends Discount {
 
     private List<UserDiscountSpending> spendingList;
 
+    // 0:no 1:yes
+    private int isFavourite;
+
 }

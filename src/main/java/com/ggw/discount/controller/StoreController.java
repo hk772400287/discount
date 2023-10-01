@@ -52,7 +52,9 @@ public class StoreController {
 
     @GetMapping("/list")
     public R<List<Store>> getAllByList() {
-        return R.success(storeService.list());
+        LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.orderByAsc(Store::getName).eq(Store::getIsDeleted, 0);
+        return R.success(storeService.list(lambdaQueryWrapper));
     }
 
     @GetMapping

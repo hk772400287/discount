@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ggw.discount.dto.DiscountDto;
 import com.ggw.discount.entity.*;
 import com.ggw.discount.mapper.DiscountMapper;
-import com.ggw.discount.service.DiscountService;
-import com.ggw.discount.service.DiscountStoreService;
-import com.ggw.discount.service.UserDiscountBalanceService;
-import com.ggw.discount.service.UserDiscountSpendingService;
+import com.ggw.discount.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +31,12 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
     @Autowired
     private UserDiscountSpendingService userDiscountSpendingService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private FavouriteService favouriteService;
+
     /**
      * Save the discount info to discount table and discount_store table.
      * @param discountDto
@@ -47,6 +50,16 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
         List<Store> storeList = discountDto.getStoreList();
         Long discountId = discountDto.getId();
         saveToDiscountStore(discountId, storeList);
+        //Save to user_discount_balance table.
+        List<User> userList = userService.list();
+        List<UserDiscountBalance> userDiscountBalanceList = userList.stream().map(user -> {
+            UserDiscountBalance userDiscountBalance = new UserDiscountBalance();
+            userDiscountBalance.setUserId(user.getId());
+            userDiscountBalance.setDiscountId(discountId);
+            userDiscountBalance.setBalanceAmount(discountDto.getMaxAmount());
+            return userDiscountBalance;
+        }).collect(Collectors.toList());
+        userDiscountBalanceService.saveBatch(userDiscountBalanceList);
     }
 
     @Override
@@ -119,6 +132,9 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
     public Page<DiscountDto> getAllWithStoresForAdmin(DiscountDto discountDtoQuery, Page<Discount> page) {
         //Get all the related discount ids.
         List<Long> discountIdList = this.baseMapper.getDiscountIdsWithStoresByStoreNameOrDesc(discountDtoQuery);
+        if (discountIdList.isEmpty()) {
+            return new Page<>();
+        }
         //Get the discount info by ids.
         Page<Discount> discountPage = this.getByIdsByPage(page, discountIdList);
         //Get store lists and set to the return Dto page info.
@@ -158,6 +174,11 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
             //Set user balance.
             BigDecimal balance = userDiscountBalanceService.getBalanceById(discountId, userId);
             discountDto.setBalanceAmount(balance);
+            //Get user's favourite discount list and set isFavourite.
+            Set<Long> favouriteDiscounts = favouriteService.listByCategory(1, userId);
+            if (favouriteDiscounts.contains(discountId)) {
+                discountDto.setIsFavourite(1);
+            }
             return discountDto;
         }))).collect(Collectors.toList());
         discountDtoPage.setRecords(discountDtos);
@@ -177,6 +198,11 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
         //Set user balance.
         BigDecimal balance = userDiscountBalanceService.getBalanceById(discountId, userId);
         discountDto.setBalanceAmount(balance);
+        //Get user's favourite discount list and set isFavourite.
+        Set<Long> favouriteDiscounts = favouriteService.listByCategory(1, userId);
+        if (favouriteDiscounts.contains(discountId)) {
+            discountDto.setIsFavourite(1);
+        }
         //Set user spending list.
         List<UserDiscountSpending> userDiscountSpendingList = userDiscountSpendingService.
                 getSpendingListById(discountId, userId);

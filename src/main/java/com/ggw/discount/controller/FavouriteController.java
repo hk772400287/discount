@@ -1,5 +1,6 @@
 package com.ggw.discount.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ggw.discount.common.BaseContext;
 import com.ggw.discount.common.R;
@@ -28,9 +29,16 @@ public class FavouriteController {
         return R.success("Saved successfully");
     }
 
-    @DeleteMapping("/{id}")
-    public R<String> delete(@PathVariable Long id) {
-        favouriteService.removeById(id);
+    @DeleteMapping
+    public R<String> delete(Favourite favourite) {
+        LambdaQueryWrapper<Favourite> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Favourite::getUserId, favourite.getUserId());
+        if (favourite.getDiscountId() != null) {
+            wrapper.eq(Favourite::getDiscountId, favourite.getDiscountId());
+        } else {
+            wrapper.eq(Favourite::getStoreId, favourite.getStoreId());
+        }
+        favouriteService.remove(wrapper);
         return R.success("Deleted successfully");
     }
 
@@ -41,8 +49,8 @@ public class FavouriteController {
      * @param category: 0: store, 1: discount.
      * @return
      */
-    @GetMapping("/{page}/{pageSize}")
-    public R<Page> getAllByCategory(@PathVariable int page, @PathVariable int pageSize, int category) {
+    @GetMapping
+    public R<Page> getAllByCategory(int page, int pageSize, int category) {
         Long userId = BaseContext.getCurrentId();
         //Long userId = 1704119254814224412L;
         Page pageInfo = favouriteService.getAllByCategory(page, pageSize, category, userId);
