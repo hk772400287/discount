@@ -114,12 +114,12 @@
             >
                 <template slot-scope="scope">
                     <el-button
-                            type="text"
-                            size="small"
-                            class="delBut non"
-                            @click="isFavouriteHandle(scope.row)"
+                        type="primary"
+                        size="big"
+                        @click="isFavouriteHandle(scope.row)"
                     >
-                        {{ scope.row.isFavourite == '0' ? '入れる' : 'はずす' }}
+                        <i v-if="scope.row.isFavourite === 0" class="el-icon-star-off"></i>
+                        <i v-else class="el-icon-star-on"></i>
                     </el-button>
                 </template>
             </el-table-column>

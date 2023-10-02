@@ -74,7 +74,6 @@
             <el-button
               type="text"
               size="small"
-              class="delBut non"
               @click="toDiscountDetail(scope.row)"
               style="white-space: normal; word-wrap: break-word; color: blue"
             >
@@ -113,12 +112,11 @@
         >
           <template slot-scope="scope">
             <el-button
-              type="text"
-              size="small"
-              class="delBut non"
+              type="primary"
+              size="big"
               @click="deleteHandle(scope.row)"
             >
-              お気に入りからはずす
+              <i class="el-icon-star-on"></i>
             </el-button>
           </template>
         </el-table-column>

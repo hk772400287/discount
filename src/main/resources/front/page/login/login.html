@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ポイント活ダッシュボード</title>
+  <title>ログイン</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="../../../backend/plugins/element-ui/index.css" />
   <link rel="stylesheet" href="../../../backend/styles/common.css">
@@ -24,7 +24,7 @@
       <div class="login-form">
         <el-form ref="loginForm" :model="loginForm" :rules="loginRules" >
           <div class="login-form-title">
-                ポイ活アプリへログイン
+                ログイン
           </div>
           <el-form-item prop="name">
             <el-input v-model="loginForm.name" type="text" auto-complete="off" placeholder="ユーザー名" maxlength="20"
@@ -40,6 +40,8 @@
               <span v-if="!loading">ログイン</span>
               <span v-else>ログイン中...</span>
             </el-button>
+            <el-button type="info" round size="medium" style="width:100%;margin-top: 20px" @click.native.prevent="handleSignUp">
+              サインアップ</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -107,6 +109,9 @@
               }
             }
           })
+        },
+        handleSignUp() {
+          window.location.href = '/front/page/login/signup.html'
         }
       }
     })

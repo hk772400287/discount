@@ -12,3 +12,12 @@ function logoutApi(){
     'method': 'post',
   })
 }
+
+function signupApi(data) {
+  return $axios({
+    'url': '/user/signup',
+    'method': 'post',
+    data
+  })
+}
+

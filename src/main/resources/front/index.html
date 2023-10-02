@@ -58,8 +58,8 @@
     <div class="container">
       <div class="tableBar">
         <el-input v-model="storeName" placeholder="店舗名" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-input v-model="description" placeholder="支払い手段など" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-button @click="handleQuery" class="dalfBut">探す</el-button>
+        <el-input v-model="description" placeholder="支払い手段など" style="width: 250px;margin-right: 10px;margin-left: 0;"></el-input>
+        <el-button @click="handleQuery" class="dalfBut" style="margin-left: 0;">探す</el-button>
         <el-button type="primary" @click="toStores()">店舗一覧</el-button>
         <el-button type="primary" @click="toFavourite()">お気に入りのキャンペーン</el-button>
       </div>
@@ -77,7 +77,6 @@
             <el-button
               type="text"
               size="small"
-              class="delBut non"
               @click="toDiscountDetail(scope.row)"
               style="white-space: normal; word-wrap: break-word; color: blue"
             >
@@ -116,12 +115,12 @@
         >
           <template slot-scope="scope">
             <el-button
-              type="text"
-              size="small"
-              class="delBut non"
+              type="primary"
+              size="big"
               @click="isFavouriteHandle(scope.row)"
             >
-              {{ scope.row.isFavourite == '0' ? '入れる' : 'はずす' }}
+              <i v-if="scope.row.isFavourite === 0" class="el-icon-star-off"></i>
+              <i v-else class="el-icon-star-on"></i>
             </el-button>
           </template>
         </el-table-column>
