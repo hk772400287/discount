@@ -11,6 +11,9 @@ SpringBoot、MySql、MyBatis Plus、Vue.jsでポイント活動を便利にす�
 ### 管理者
 
 - **キャンペンーン情報の管理**：キャンペンーンの期間、支払い手段や還元率などの詳細情報、対象店舗、上限額を管理できます。
+  
+![adminDB](https://github.com/hk772400287/discount/assets/105110420/851de999-50c0-42f9-9000-40a3caaf6541)
+
 
 ### ユーザー
 
@@ -19,6 +22,11 @@ SpringBoot、MySql、MyBatis Plus、Vue.jsでポイント活動を便利にす�
 - **キャンペンーンの利用状況確認**: あるキャンペンーンに対しての消費記録が確認できます。
 - **消費記録の記入**: キャンペンーンに対しての消費記録が取れます。
 - **お気に入り**: 好きなお店とキャンペンーが登録できます。
+  
+![userIndex](https://github.com/hk772400287/discount/assets/105110420/69f22871-79a4-44a0-845f-a6e57ac09a24)
+
+![discountDetail](https://github.com/hk772400287/discount/assets/105110420/7d1ee3c0-a8a7-4b2f-8634-b2f3cf7715cf)
+
 
 ## なぜ作ったか
 
