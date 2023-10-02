@@ -1,6 +1,6 @@
 # ポイ活アプリ
 
-SpringBoot、MySql、MyBatis Plusでポイント活動を便利にするアプリを作っています。（9月27日のところ、フロントエンド作成中）
+SpringBoot、MySql、MyBatis Plus、Vue.jsでポイント活動を便利にするアプリを作りました。
 
 ## どんなアプリ？
 
