@@ -1,8 +1,11 @@
 package com.ggw.discount.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ggw.discount.common.BaseContext;
 import com.ggw.discount.common.R;
+import com.ggw.discount.entity.Store;
 import com.ggw.discount.entity.UserDiscountSpending;
+import com.ggw.discount.service.StoreService;
 import com.ggw.discount.service.UserDiscountSpendingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +19,15 @@ public class UserDiscountSpendingController {
     @Autowired
     private UserDiscountSpendingService userDiscountSpendingService;
 
+    @Autowired
+    private StoreService storeService;
+
     @PostMapping
     public R<String> add(@RequestBody UserDiscountSpending spending) {
         spending.setUserId(BaseContext.getCurrentId());
-        //Long userId = 1704119254814224412L;
-        //spending.setUserId(userId);
+        Long storeId = spending.getStoreId();
+        Store store = storeService.getById(storeId);
+        spending.setStoreName(store.getName());
         userDiscountSpendingService.addWithbalance(spending);
         return R.success("Added successfully");
     }

@@ -18,7 +18,7 @@ function addFavourite (params) {
 
 function getFavouriteByCategory (params) {
     return $axios({
-        url: '/discount/forUserByPage',
+        url: '/favourite',
         method: 'get',
         params
     })

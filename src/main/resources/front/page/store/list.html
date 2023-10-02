@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ポイ活一覧</title>
+  <title>Document</title>
   <!-- 引入样式 -->
-  <link rel="stylesheet" href="../backend/plugins/element-ui/index.css" />
-  <link rel="stylesheet" href="../backend/styles/common.css" />
-  <link rel="stylesheet" href="../backend/styles/page.css" />
+  <link rel="stylesheet" href="../../../backend/plugins/element-ui/index.css" />
+  <link rel="stylesheet" href="../../../backend/styles/common.css" />
+  <link rel="stylesheet" href="../../../backend/styles/page.css" />
   <style>
     #member-app  .notAdmin::after{
       border: 0 !important;
@@ -51,75 +51,59 @@
       </div>
       <div class="right-menu">
         <div class="avatar-wrapper">{{ this.user.name }}</div>
-        <img src="../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
+        <img src="../../../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
       </div>
     </div>
 
     <div class="container">
       <div class="tableBar">
         <el-input v-model="storeName" placeholder="店舗名" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-input v-model="description" placeholder="支払い手段など" style="width: 250px;margin-right: 10px;"></el-input>
         <el-button @click="handleQuery" class="dalfBut">探す</el-button>
-        <el-button type="primary" @click="toStores()">店舗一覧</el-button>
-        <el-button type="primary" @click="toFavourite()">お気に入りのキャンペーン</el-button>
+        <el-button type="primary" @click="goBack()">キャンペーン一覧</el-button>
+        <el-button type="primary" @click="toFavourite()">お気に入りの店舗</el-button>
       </div>
       <el-table
         :data="tableData"
         stripe
         class="tableBox"
       >
+        <el-table-column prop="icon" label="アイコン" align="center">
+          <template slot-scope="{ row }">
+            <el-image style="width: auto; height: 40px; border:none;cursor: pointer;"
+                      :src="getImage(row.icon)"
+                      :preview-src-list="[ `/common/download?name=${row.icon}` ]" >
+              <div slot="error" class="image-slot">
+                <img src="../../../backend/images/noImg.png"  style="width: auto; height: 40px; border:none;" >
+              </div>
+            </el-image>
+          </template>
+        </el-table-column>
         <el-table-column
-          label="キャンペンーン内容"
-          width="160"
-          align="left"
+                label="店舗名"
         >
           <template slot-scope="scope">
             <el-button
-              type="text"
-              size="small"
-              class="delBut non"
-              @click="toDiscountDetail(scope.row)"
-              style="white-space: normal; word-wrap: break-word; color: blue"
+                    type="text"
+                    size="small"
+                    class="delBut non"
+                    @click="queryByStore(scope.row)"
+                    style="white-space: normal; word-wrap: break-word; color: blue"
             >
-              {{ scope.row.description }}
+              {{ scope.row.name }}
             </el-button>
           </template>
         </el-table-column>
-
         <el-table-column
-          prop="start"
-          label="開始日"
-        ></el-table-column>
-        <el-table-column
-          prop="end"
-          label="終了日"
-        ></el-table-column>
-        <el-table-column
-          prop="maxAmount"
-          label="上限額"
-        ></el-table-column>
-        <el-table-column label="対象店舗">
-          <template slot-scope="scope">
-            <div v-for="store in scope.row.storeList">
-              {{ store.name }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="balanceAmount"
-          label="上限額までの金額"
-        ></el-table-column>
-        <el-table-column
-          label="お気に入り"
-          width="160"
-          align="center"
+                label="お気に入り"
+                width="160"
+                align="center"
         >
           <template slot-scope="scope">
             <el-button
-              type="text"
-              size="small"
-              class="delBut non"
-              @click="isFavouriteHandle(scope.row)"
+                    type="text"
+                    size="small"
+                    class="delBut non"
+                    @click="isFavouriteHandle(scope.row)"
             >
               {{ scope.row.isFavourite == '0' ? '入れる' : 'はずす' }}
             </el-button>
@@ -139,30 +123,27 @@
     </div>
   </div>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
-    <script src="../backend/plugins/vue/vue.js"></script>
+    <script src="../../../backend/plugins/vue/vue.js"></script>
     <!-- 引入组件库 -->
-    <script src="../backend/plugins/element-ui/index.js"></script>
+    <script src="../../../backend/plugins/element-ui/index.js"></script>
     <!-- 引入axios -->
-    <script src="../backend/plugins/axios/axios.min.js"></script>
-    <script src="js/request.js"></script>
-    <script src="../backend/api/discount.js"></script>
-    <script src="../backend/api/login.js"></script>
-    <script src="api/favourite.js"></script>
+    <script src="../../../backend/plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../api/store.js"></script>
+    <script src="../../api/favourite.js"></script>
+  <script src="../../../backend/api/discount.js"></script>
     <script>
       new Vue({
         el: '#member-app',
         data() {
           return {
-             user: {},
              storeName: '',
-             description: '',
              counts: 0,
              page: 1,
              pageSize: 10,
              tableData : [],
              id : '',
-             isFavourite : '',
-             headTitle: 'キャンペーン一覧',
+             headTitle: '店舗一覧',
           }
         },
         computed: {},
@@ -178,9 +159,8 @@
               page: this.page,
               pageSize: this.pageSize,
               name: this.storeName ? this.storeName : undefined,
-              description: this.description ? this.description : undefined
             }
-            await getDiscountListForUser(params).then(res => {
+            await getAllStoresForUserByPage(params).then(res => {
               if (String(res.code) === '1') {
                 this.tableData = res.data.records || []
                 this.counts = res.data.total
@@ -189,22 +169,17 @@
               this.$message.error('リクエストエラー：' + err)
             })
           },
+          getImage (image) {
+            return `/common/download?name=${image}`
+          },
           handleQuery() {
             this.page = 1;
             this.init();
           },
-          logout() {
-            logoutApi().then((res)=>{
-              if(res.code === 1){
-                localStorage.removeItem('userInfo')
-                window.location.href = '/front/page/login/login.html'
-              }
-            })
-          },
           isFavouriteHandle (row) {
             this.id = row.id
             if (row.isFavourite === 0) {
-              addFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
+              addFavourite({ 'userId': this.user.id, 'storeId': this.id }).then(res => {
                 if (String(res.code) === '1') {
                   this.$message.success('お気に入りに入れました')
                   this.handleQuery()
@@ -213,7 +188,7 @@
                 this.$message.error('リクエストエラー：' + err)
               })
             } else {
-              deleteFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
+              deleteFavourite({ 'userId': this.user.id, 'storeId': this.id }).then(res => {
                 if (String(res.code) === '1') {
                   this.$message.success('お気に入りから外しました')
                   this.handleQuery()
@@ -223,9 +198,23 @@
               })
             }
           },
-          toDiscountDetail(row) {
-            this.id = row.id
-            window.location.href = '/front/page/discount/detail.html?id=' + this.id
+          logout() {
+            logoutApi().then((res)=>{
+              if(res.code === 1){
+                localStorage.removeItem('userInfo')
+                window.location.href = '/front/page/login/login.html'
+              }
+            })
+          },
+          queryByStore(row){
+            window.location.href = '/front/page/discount/byStore.html?name=' + encodeURIComponent(row.name)
+          },
+          goBack() {
+            //this.$router.back();
+            window.location.href = '/front/index.html'
+          },
+          toFavourite() {
+            window.location.href = '/front/page/favourite/store.html'
           },
           handleSizeChange (val) {
             this.pageSize = val
@@ -234,12 +223,6 @@
           handleCurrentChange (val) {
             this.page = val
             this.init()
-          },
-          toStores() {
-            window.location.href = '/front/page/store/list.html'
-          },
-          toFavourite() {
-            window.location.href = '/front/page/favourite/discount.html'
           }
         }
       })

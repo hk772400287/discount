@@ -48,15 +48,15 @@
             align-items: stretch;
         }
 
-        /* 调整第二个表格的间距，使其与第一个表格有一定的距离 */
+
         .el-table:nth-child(2) {
             margin-top: 20px;
         }
 
-        /* "增加消费记录" 按钮样式 */
-        .add-record-button {
-            align-self: flex-end; /* 右对齐 */
-            margin-top: 20px; /* 距离上方表格的距离 */
+        .bottomButtons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
         }
 
     </style>
@@ -126,7 +126,7 @@
         </el-table>
 
         <el-table
-                :data="tableData.spendingList"
+                :data="spendingList"
                 stripe
                 class="tableBox"
         >
@@ -142,16 +142,80 @@
                     prop="amount"
                     label="消費金額"
             ></el-table-column>
+            <el-table-column
+                    label="操作"
+                    align="center"
+            >
+                <template slot-scope="scope">
+                    <el-button
+                            type="text"
+                            size="small"
+                            class="delBut non"
+                            @click="deleteSpendingRecord(scope.row.id)"
+                    >
+                        削除
+                    </el-button>
+                </template>
+            </el-table-column>
         </el-table>
 
-        <div class="add-record-button">
+        <div class="bottomButtons">
             <el-button
                     type="primary"
-                    @click="addSpendingRecord()"
+                    @click="goBack()"
+            >
+                戻る
+            </el-button>
+            <el-button
+                    type="primary"
+                    @click="addClass()"
             >
                 消費記録を追加
             </el-button>
         </div>
+
+        <el-dialog
+                :title="classData.title"
+                :visible.sync="classData.dialogVisible"
+                width="30%"
+                :before-close="handleClose"
+        >
+            <el-form
+                    class="demo-form-inline"
+                    label-width="100px"
+            >
+                <el-form-item label="日付：">
+                    <el-date-picker v-model="classData.date" type="date" placeholder="日付を選んでください"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="店舗名：">
+                    <el-select v-model="classData.storeId" placeholder="店舗名を選んでください" clearable>
+                        <el-option
+                                v-for="store in (tableData.length > 0 ? tableData[0].storeList : [])"
+                                :key="store.id"
+                                :label="store.name"
+                                :value="store.id"
+                        ></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="消費金額：">
+                    <el-input v-model="classData.amount"  type="number" placeholder="金額を入力" />
+                </el-form-item>
+            </el-form>
+            <span
+                    slot="footer"
+                    class="dialog-footer"
+            >
+            <el-button
+                    size="medium"
+                    @click="classData.dialogVisible = false"
+            >キャンセル</el-button>
+            <el-button
+                    type="primary"
+                    size="medium"
+                    @click="addSpendingRecord()"
+            >追加する</el-button>
+            </span>
+        </el-dialog>
     </div>
 </div>
 <!-- 开发环境版本，包含了有帮助的命令行警告 -->
@@ -165,6 +229,7 @@
 <script src="../../../backend/api/discount.js"></script>
 <script src="../../../backend/api/login.js"></script>
 <script src="../../api/favourite.js"></script>
+<script src="../../api/spending.js"></script>
 <script>
     new Vue({
         el: '#member-app',
@@ -174,7 +239,15 @@
                 tableData : [],
                 id : '',
                 isFavourite : '',
+                spendingList: [],
                 headTitle: 'キャンペーン詳細と消費記録',
+                classData: {
+                    'title': '新消費記録',
+                    'dialogVisible': false,
+                    'date': '',
+                    'storeId': '',
+                    'amount': ''
+                }
             }
         },
         computed: {},
@@ -191,6 +264,7 @@
                     console.log(res.data)
                     if (String(res.code) === '1') {
                         this.tableData = [res.data] || []
+                        this.spendingList = this.tableData[0].spendingList
                     }
                 }).catch(err => {
                     this.$message.error('リクエストエラー：' + err)
@@ -230,8 +304,60 @@
                 }
             },
             addSpendingRecord() {
+                //Transform date format.
+                const date = new Date(this.classData.date);
+                this.classData.date = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                const params = {
+                    'date': this.classData.date,
+                    'storeId':  this.classData.storeId,
+                    'amount':  this.classData.amount,
+                    'discountId': this.id
+                }
+                addSpending(params).then(res => {
+                    if (res.code === 1) {
+                        this.$message.success('消費記録を追加しました')
+                        this.classData.dialogVisible = false
+                        this.handleQuery()
+                    } else {
+                        this.$message.error(res.msg || 'エラー')
+                    }
+                }).catch(err => {
+                    this.$message.error('リクエストエラー：' + err)
+                })
 
+            },
+            deleteSpendingRecord(id) {
+                this.$confirm('消費記録を削除しますか?', '確認', {
+                    'confirmButtonText': 'はい',
+                    'cancelButtonText': 'いいえ',
+                    'type': 'warning'
+                }).then(() => {
+                    deleteSpending(id).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('削除しました')
+                            this.handleQuery()
+                        } else {
+                            this.$message.error(res.msg || 'エラー')
+                        }
+                    }).catch(err => {
+                        this.$message.error('リクエストエラー：' + err)
+                    })
+                })
+            },
+            addClass() {
+                this.classData.date = ''
+                this.classData.storeId = ''
+                this.classData.amount = ''
+                this.classData.dialogVisible = true
+            },
+            handleClose(st) {
+                this.classData.dialogVisible = false
+            },
+            goBack() {
+                //this.$router.back();
+                window.location.href = '/front/index.html'
             }
+
         }
     })
 </script>

@@ -3,14 +3,18 @@ package com.ggw.discount.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ggw.discount.common.BaseContext;
 import com.ggw.discount.common.R;
+import com.ggw.discount.dto.StoreDto;
 import com.ggw.discount.entity.Store;
+import com.ggw.discount.service.FavouriteService;
 import com.ggw.discount.service.StoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Slf4j
@@ -19,6 +23,8 @@ public class StoreController {
 
     @Autowired
     private StoreService storeService;
+
+
 
     @PostMapping
     public R<String> add(@RequestBody Store store) {
@@ -42,12 +48,14 @@ public class StoreController {
 
     @GetMapping("/page")
     public R<Page> getAllByPage(int page, int pageSize, Store store) {
-        Page<Store> pageInfo = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.orderByAsc(Store::getName).eq(Store::getIsDeleted, 0);
-        lambdaQueryWrapper.like(store.getName() != null, Store::getName, store.getName());
-        storeService.page(pageInfo, lambdaQueryWrapper);
+        Page<Store> pageInfo = storeService.getAllByPage(page, pageSize, store);
         return R.success(pageInfo);
+    }
+
+    @GetMapping("/userpage")
+    public R<Page> getAllWithFavouriteByPage(int page, int pageSize, Store store) {
+        Page<StoreDto> dtoPage = storeService.getAllWithFavouriteByPage(page, pageSize, store);
+        return R.success(dtoPage);
     }
 
     @GetMapping("/list")

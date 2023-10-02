@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ポイ活一覧</title>
   <!-- 引入样式 -->
-  <link rel="stylesheet" href="../backend/plugins/element-ui/index.css" />
-  <link rel="stylesheet" href="../backend/styles/common.css" />
-  <link rel="stylesheet" href="../backend/styles/page.css" />
+  <link rel="stylesheet" href="../../../backend/plugins/element-ui/index.css" />
+  <link rel="stylesheet" href="../../../backend/styles/common.css" />
+  <link rel="stylesheet" href="../../../backend/styles/page.css" />
   <style>
     #member-app  .notAdmin::after{
       border: 0 !important;
@@ -51,17 +51,14 @@
       </div>
       <div class="right-menu">
         <div class="avatar-wrapper">{{ this.user.name }}</div>
-        <img src="../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
+        <img src="../../../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
       </div>
     </div>
 
     <div class="container">
       <div class="tableBar">
-        <el-input v-model="storeName" placeholder="店舗名" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-input v-model="description" placeholder="支払い手段など" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-button @click="handleQuery" class="dalfBut">探す</el-button>
         <el-button type="primary" @click="toStores()">店舗一覧</el-button>
-        <el-button type="primary" @click="toFavourite()">お気に入りのキャンペーン</el-button>
+        <el-button type="primary" @click="goBack()">キャンペーン一覧</el-button>
       </div>
       <el-table
         :data="tableData"
@@ -110,7 +107,7 @@
           label="上限額までの金額"
         ></el-table-column>
         <el-table-column
-          label="お気に入り"
+          label="操作"
           width="160"
           align="center"
         >
@@ -119,9 +116,9 @@
               type="text"
               size="small"
               class="delBut non"
-              @click="isFavouriteHandle(scope.row)"
+              @click="deleteHandle(scope.row)"
             >
-              {{ scope.row.isFavourite == '0' ? '入れる' : 'はずす' }}
+              お気に入りからはずす
             </el-button>
           </template>
         </el-table-column>
@@ -139,30 +136,27 @@
     </div>
   </div>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
-    <script src="../backend/plugins/vue/vue.js"></script>
+    <script src="../../../backend/plugins/vue/vue.js"></script>
     <!-- 引入组件库 -->
-    <script src="../backend/plugins/element-ui/index.js"></script>
+    <script src="../../../backend/plugins/element-ui/index.js"></script>
     <!-- 引入axios -->
-    <script src="../backend/plugins/axios/axios.min.js"></script>
-    <script src="js/request.js"></script>
-    <script src="../backend/api/discount.js"></script>
-    <script src="../backend/api/login.js"></script>
-    <script src="api/favourite.js"></script>
+    <script src="../../../backend/plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+    <script src="../../../backend/api/discount.js"></script>
+    <script src="../../../backend/api/login.js"></script>
+    <script src="../../api/favourite.js"></script>
     <script>
       new Vue({
         el: '#member-app',
         data() {
           return {
              user: {},
-             storeName: '',
-             description: '',
              counts: 0,
              page: 1,
              pageSize: 10,
              tableData : [],
              id : '',
-             isFavourite : '',
-             headTitle: 'キャンペーン一覧',
+             headTitle: 'お気に入りのキャンペーン',
           }
         },
         computed: {},
@@ -177,10 +171,9 @@
             const params = {
               page: this.page,
               pageSize: this.pageSize,
-              name: this.storeName ? this.storeName : undefined,
-              description: this.description ? this.description : undefined
+              category: 1
             }
-            await getDiscountListForUser(params).then(res => {
+            await getFavouriteByCategory(params).then(res => {
               if (String(res.code) === '1') {
                 this.tableData = res.data.records || []
                 this.counts = res.data.total
@@ -201,27 +194,16 @@
               }
             })
           },
-          isFavouriteHandle (row) {
+          deleteHandle (row) {
             this.id = row.id
-            if (row.isFavourite === 0) {
-              addFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
-                if (String(res.code) === '1') {
-                  this.$message.success('お気に入りに入れました')
-                  this.handleQuery()
-                }
-              }).catch(err => {
-                this.$message.error('リクエストエラー：' + err)
-              })
-            } else {
-              deleteFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
-                if (String(res.code) === '1') {
-                  this.$message.success('お気に入りから外しました')
-                  this.handleQuery()
-                }
-              }).catch(err => {
-                this.$message.error('リクエストエラー：' + err)
-              })
-            }
+            deleteFavourite({ 'userId': this.user.id, 'discountId': this.id }).then(res => {
+              if (String(res.code) === '1') {
+                this.$message.success('お気に入りから外しました')
+                this.handleQuery()
+              }
+            }).catch(err => {
+              this.$message.error('リクエストエラー：' + err)
+            })
           },
           toDiscountDetail(row) {
             this.id = row.id
@@ -238,9 +220,9 @@
           toStores() {
             window.location.href = '/front/page/store/list.html'
           },
-          toFavourite() {
-            window.location.href = '/front/page/favourite/discount.html'
-          }
+          goBack() {
+            window.location.href = '/front/index.html'
+          },
         }
       })
     </script>

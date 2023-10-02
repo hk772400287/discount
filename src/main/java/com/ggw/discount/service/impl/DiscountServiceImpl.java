@@ -150,6 +150,9 @@ public class DiscountServiceImpl extends ServiceImpl<DiscountMapper, Discount> i
     @Override
     public Page<DiscountDto> getAllWithStoresForUser(DiscountDto discountDtoQuery, Page<Discount> page, Long userId) {
         List<Long> discountIdList = this.baseMapper.getUnexpiredDiscountIdsWithStoresByStoreNameOrDesc(discountDtoQuery);
+        if (discountIdList.isEmpty()) {
+            return new Page<>();
+        }
         Page<Discount> discountPage = this.getByIdsByPage(page, discountIdList);
         //Get store lists & user balance and set to the return Dto page info.
         return this.convertDiscountPageToDiscountDtoPage(discountPage, userId);

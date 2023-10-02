@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ポイ活一覧</title>
   <!-- 引入样式 -->
-  <link rel="stylesheet" href="../backend/plugins/element-ui/index.css" />
-  <link rel="stylesheet" href="../backend/styles/common.css" />
-  <link rel="stylesheet" href="../backend/styles/page.css" />
+  <link rel="stylesheet" href="../../../backend/plugins/element-ui/index.css" />
+  <link rel="stylesheet" href="../../../backend/styles/common.css" />
+  <link rel="stylesheet" href="../../../backend/styles/page.css" />
   <style>
     #member-app  .notAdmin::after{
       border: 0 !important;
@@ -51,15 +51,12 @@
       </div>
       <div class="right-menu">
         <div class="avatar-wrapper">{{ this.user.name }}</div>
-        <img src="../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
+        <img src="../../../backend/images/icons/btn_close@2x.png" class="outLogin" alt="ログアウト" @click="logout" />
       </div>
     </div>
 
     <div class="container">
       <div class="tableBar">
-        <el-input v-model="storeName" placeholder="店舗名" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-input v-model="description" placeholder="支払い手段など" style="width: 250px;margin-right: 10px;"></el-input>
-        <el-button @click="handleQuery" class="dalfBut">探す</el-button>
         <el-button type="primary" @click="toStores()">店舗一覧</el-button>
         <el-button type="primary" @click="toFavourite()">お気に入りのキャンペーン</el-button>
       </div>
@@ -139,15 +136,16 @@
     </div>
   </div>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
-    <script src="../backend/plugins/vue/vue.js"></script>
+    <script src="../../../backend/plugins/vue/vue.js"></script>
     <!-- 引入组件库 -->
-    <script src="../backend/plugins/element-ui/index.js"></script>
+    <script src="../../../backend/plugins/element-ui/index.js"></script>
     <!-- 引入axios -->
-    <script src="../backend/plugins/axios/axios.min.js"></script>
-    <script src="js/request.js"></script>
-    <script src="../backend/api/discount.js"></script>
-    <script src="../backend/api/login.js"></script>
-    <script src="api/favourite.js"></script>
+    <script src="../../../backend/plugins/axios/axios.min.js"></script>
+    <script src="../../js/request.js"></script>
+  <script src="../../../backend/js/index.js"></script>
+    <script src="../../../backend/api/discount.js"></script>
+    <script src="../../../backend/api/login.js"></script>
+    <script src="../../api/favourite.js"></script>
     <script>
       new Vue({
         el: '#member-app',
@@ -155,14 +153,13 @@
           return {
              user: {},
              storeName: '',
-             description: '',
              counts: 0,
              page: 1,
              pageSize: 10,
              tableData : [],
              id : '',
              isFavourite : '',
-             headTitle: 'キャンペーン一覧',
+             headTitle: '',
           }
         },
         computed: {},
@@ -174,11 +171,12 @@
         },
         methods: {
           async init () {
+            this.storeName = decodeURIComponent(requestUrlParam('name'));
+            this.headTitle = '\\\\\\' + this.storeName + '///の今やっているキャンペーン'
             const params = {
               page: this.page,
               pageSize: this.pageSize,
               name: this.storeName ? this.storeName : undefined,
-              description: this.description ? this.description : undefined
             }
             await getDiscountListForUser(params).then(res => {
               if (String(res.code) === '1') {
@@ -239,7 +237,7 @@
             window.location.href = '/front/page/store/list.html'
           },
           toFavourite() {
-            window.location.href = '/front/page/favourite/discount.html'
+
           }
         }
       })
